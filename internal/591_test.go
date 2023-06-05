@@ -1,46 +1,82 @@
 package internal
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
-func TestCrawl(t *testing.T) {
-	// 建立測試伺服器
-	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 回傳測試用的範例 HTML 內容
-		htmlContent := []byte(`
-			<div class="listInfo">
-				<div class="houseInfo-title">House 1</div>
-				<div class="price">10000</div>
-			</div>
-			<div class="listInfo">
-				<div class="houseInfo-title">House 2</div>
-				<div class="price">20000</div>
-			</div>
-		`)
-		w.Write(htmlContent)
-	}))
-	defer testServer.Close()
-
-	// 使用測試伺服器的 URL 進行測試
-	titles, prices, err := Crawl(testServer.URL)
-	if err != nil {
-		t.Fatalf("爬取失敗URL%s：%v", testServer.URL, err)
+func TestSaveRent591Home(t *testing.T) {
+	datum := &[]Datum{
+		{
+			Title:     "3樓獨立套房出租",
+			Type:      "1",
+			PostID:    1,
+			KindName:  "獨立套房",
+			RoomStr:   "",
+			FloorStr:  "3F/4F",
+			Community: "",
+			Price:     "1,000",
+			PriceUnit: "元/月",
+			PhotoList: []string{
+				"1.jpg",
+				"2.jpg",
+				"3.jpg",
+				"4.jpg",
+				"5.jpg",
+			},
+			SectionName:      "內湖區",
+			StreetName:       "測試路三段",
+			Location:         "內湖區-測試路x段xx巷",
+			Area:             "6",
+			RoleName:         "代理人",
+			Contact:          "王先生",
+			RefreshTime:      "10小時內",
+			YesterdayHit:     517,
+			IsVIP:            0,
+			IsCombine:        2,
+			Hurry:            0,
+			IsSocial:         0,
+			DiscountPriceStr: "",
+			CasesID:          1.0,
+			IsVideo:          0,
+			Preferred:        0,
+			CID:              0,
+		},
+		{
+			Title:     "2樓獨立套房出租",
+			Type:      "1",
+			PostID:    2,
+			KindName:  "獨立套房",
+			RoomStr:   "",
+			FloorStr:  "2F/4F",
+			Community: "",
+			Price:     "1,113",
+			PriceUnit: "元/月",
+			PhotoList: []string{
+				"1.jpg",
+				"2.jpg",
+				"3.jpg",
+				"4.jpg",
+				"5.jpg",
+			},
+			SectionName:      "中和區",
+			StreetName:       "測試路四段",
+			Location:         "中和區-測試路x段xx巷",
+			Area:             "6",
+			RoleName:         "代理人",
+			Contact:          "林先生",
+			RefreshTime:      "3小時內",
+			YesterdayHit:     111,
+			IsVIP:            0,
+			IsCombine:        2,
+			Hurry:            0,
+			IsSocial:         0,
+			DiscountPriceStr: "",
+			CasesID:          "",
+			IsVideo:          0,
+			Preferred:        0,
+			CID:              0,
+		},
 	}
 
-	// 驗證結果是否符合預期
-	expectedTitles := []string{"House 1", "House 2"}
-	expectedPrices := []string{"10000", "20000"}
-	for i, title := range titles {
-		if title != expectedTitles[i] {
-			t.Errorf("標題不符合預期。預期：%s，實際：%s", expectedTitles[i], title)
-		}
-	}
-	for i, price := range prices {
-		if price != expectedPrices[i] {
-			t.Errorf("價格不符合預期。預期：%s，實際：%s", expectedPrices[i], price)
-		}
-	}
+	SaveRent591Home(datum)
 }

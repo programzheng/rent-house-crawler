@@ -1,0 +1,17 @@
+database:
+  driver: mysql
+  source-name: "root:root@tcp(127.0.0.1:3306)/rent-house-crawler?loc=Local&parseTime=True"
+cache:
+  driver: redis
+  addr: 127.0.0.1:6379
+  tls: false
+  tls-skip-verify: false
+  password: ""
+  db: 0
+crawlers:
+  "591":
+    cookie-and-csrf-token-url: ""
+    urls:
+      - ""
+    detail-url: ""
+
