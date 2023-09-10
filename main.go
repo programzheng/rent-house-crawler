@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
-
-	"github.com/programzheng/rent-house-crawler/internal"
+	"github.com/programzheng/rent-house-crawler/cmd"
+	"github.com/programzheng/rent-house-crawler/internal/job"
 )
 
 func main() {
-	ctx := context.Background()
-	// internal.SaveHomeData(ctx)
-	internal.UpsertAllHomeByDetailData(ctx)
+	job.RunJobs()
+	cmd.Execute()
 }

@@ -1,5 +1,6 @@
 database:
   driver: mysql
+  debug: false
   source-name: "root:root@tcp(127.0.0.1:3306)/rent-house-crawler?loc=Local&parseTime=True"
 cache:
   driver: redis
@@ -13,5 +14,9 @@ crawlers:
     cookie-and-csrf-token-url: ""
     urls:
       - ""
+    detail-cookie-token-key: ""
+    detail-data-url: ""
     detail-url: ""
+jobs:
+  update-591-homes: "0 0 * * *"
 

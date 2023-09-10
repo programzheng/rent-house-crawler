@@ -3,11 +3,12 @@ package internal
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/programzheng/rent-house-crawler/config"
 	"github.com/programzheng/rent-house-crawler/ent"
 	"github.com/programzheng/rent-house-crawler/internal/repository"
-	"github.com/programzheng/rent-house-crawler/pkg"
+	"github.com/programzheng/rent-house-crawler/pkg/helper"
 )
 
 var RegionIDs = map[string]int{
@@ -70,12 +71,12 @@ func SaveRent591Home(ctx context.Context, datum *[]Datum) {
 	// }
 
 	for _, data := range *datum {
-		tp, err := pkg.ConvertCommaSeparatedStringToInt(data.Type)
+		tp, err := helper.ConvertCommaSeparatedStringToInt(data.Type)
 		if err != nil {
 			log.Fatalf("data.Type ConvertCommaSeparatedStringToInt error: %v", err)
 		}
 
-		price, err := pkg.ConvertCommaSeparatedStringToInt(data.Price)
+		price, err := helper.ConvertCommaSeparatedStringToInt(data.Price)
 		if err != nil {
 			log.Fatalf("data.Price ConvertCommaSeparatedStringToInt error: %v", err)
 		}
@@ -151,9 +152,9 @@ func UpsertAllHomeByDetailData(ctx context.Context) {
 	if err != nil {
 		log.Fatalf("UpsertAllHomeDetailData rp.GetRent591HomePostIDs error: %v", err)
 	}
-	detailUrl := config.Cfg.GetString("crawlers.591.detail-url")
+	detailDataUrl := config.Cfg.GetString("crawlers.591.detail-data-url")
 	for _, r5h := range r5hs {
-		dd, err := GetHomeDetailDataByPostIDAtCrawl(detailUrl, r5h.PostID)
+		dd, err := GetHomeDetailDataByPostIDAtCrawl(detailDataUrl, r5h.PostID)
 		if err != nil {
 			log.Printf("GetHomeDetailDataByPostIDAtCrawl post ID:%d error: %v", r5h.PostID, err)
 			continue
@@ -182,13 +183,18 @@ func UpsertAllHomeByDetailData(ctx context.Context) {
 					log.Printf("UpsertRent591HomeDetailPositionRoundByRent591HomeDetailID post ID:%d, Retn591HomeDetail ID:%d, error: %v", r5h.PostID, r5hdID, err)
 					continue
 				}
+				_, err = rp.UpsertRent591HomeDetailPublishByRent591HomeDetailID(ctx, r5hdID, createEntRent591HomeDetailPublish(&dd.Publish))
+				if err != nil {
+					log.Printf("UpsertRent591HomeDetailPublishByRent591HomeDetailID post ID:%d, Retn591HomeDetail ID:%d, error: %v", r5h.PostID, r5hdID, err)
+					continue
+				}
 			}
 		}
 	}
 }
 
 func createEntRent591HomeDetail(dd *HomeDetailData) *ent.Rent591HomeDetail {
-	price, err := pkg.ConvertCommaSeparatedStringToInt(dd.Price)
+	price, err := helper.ConvertCommaSeparatedStringToInt(dd.Price)
 	if err != nil {
 		log.Fatalf("createEntRent591HomeDetail ConvertCommaSeparatedStringToInt error: %v", err)
 	}
@@ -222,12 +228,12 @@ func createEntRent591HomeDetailBreadcrumb(ddbs []HomeDetailDataBreadcrumb) *ent.
 }
 
 func createEntRent591HomeDetailPositionRound(ddpr HomeDetailDataPositionRound) *ent.Rent591HomeDetailPositionRound {
-	lat, err := pkg.ConvertStringToFloat64(ddpr.Lat)
+	lat, err := helper.ConvertStringToFloat64(ddpr.Lat)
 	if err != nil {
 		log.Fatalf("createEntRent591HomeDetailPositionRound Lat ConvertStringToFloat64 error: %v", err)
 	}
 
-	lng, err := pkg.ConvertStringToFloat64(ddpr.Lng)
+	lng, err := helper.ConvertStringToFloat64(ddpr.Lng)
 	if err != nil {
 		log.Fatalf("createEntRent591HomeDetailPositionRound Lng ConvertStringToFloat64 error: %v", err)
 	}
@@ -242,4 +248,30 @@ func createEntRent591HomeDetailPositionRound(ddpr HomeDetailDataPositionRound) *
 		Lat:           lat,
 		Lng:           lng,
 	}
+}
+
+func createEntRent591HomeDetailPublish(ddp *HomeDetailDataPublish) *ent.Rent591HomeDetailPublish {
+	return &ent.Rent591HomeDetailPublish{
+		PostID:     ddp.ID,
+		Name:       ddp.Name,
+		Key:        ddp.Key,
+		PostTime:   ddp.PostTime,
+		UpdateTime: ddp.UpdateTime,
+	}
+}
+
+func GetRent591HomesFilterCreatedAtByStartTimestampAndEndTimestamp(ctx context.Context, startTimestamp *time.Time, endTimestamp *time.Time) ([]*ent.Rent591Home, error) {
+	rp, err := repository.NewRepository()
+	if err != nil {
+		return nil, err
+	}
+	return rp.GetRent591HomesFilterCreatedAtByStartTimestampAndEndTimestamp(ctx, startTimestamp, endTimestamp)
+}
+
+func GetNewRent591HomesByCity(ctx context.Context, city *string) ([]*ent.Rent591Home, error) {
+	rp, err := repository.NewRepository()
+	if err != nil {
+		return nil, err
+	}
+	return rp.GetNewRent591HomesByRegionID(ctx, 1)
 }

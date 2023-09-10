@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package rent_house;
+option go_package = "proto/rent-house";
+import "google/protobuf/timestamp.proto";
+
+message RentHouse {
+    string title = 1;
+    int64 type = 2;
+    int64 post_id = 3;
+    string kind_name = 4;
+    string room_str = 5;
+    string floor_str = 6;
+    string community = 7;
+    int64 price = 8;
+    string price_unit = 9;
+    repeated string photo_list = 10;
+    string region_name = 11;
+    string section_name = 12;
+    string street_name = 13;
+    string location = 14;
+    string area = 15;
+    string role_name = 16;
+    string contact = 17;
+    string refresh_time = 18;
+    int64 yesterday_hit = 19;
+    int32 is_vip = 20;
+    int32 is_combine = 21;
+    int32 hurry = 22;
+    int32 is_social = 23;
+    string discount_price_str = 24;
+    int64 cases_id = 25;
+    int32 is_video = 26;
+    int32 preferred = 27;
+    int64 cid = 28;
+    string detail_url = 29;
+}
+
+message GetRentHousesByConditionsRequest {
+    string keyword = 1;
+    string city = 2;
+}
+
+message GetRentHousesByTimestampRequest {
+    google.protobuf.Timestamp start_timestamp = 1;
+    google.protobuf.Timestamp end_timestamp = 2;
+}
+
+message GetRentHousesResponse {
+    string status = 1;
+    string status_message = 2;
+    repeated RentHouse rent_houses = 3;
+}
+
+service Proxy {
+    rpc GetRentHousesByTimestamp(GetRentHousesByTimestampRequest) returns (GetRentHousesResponse);
+    rpc GetRentHousesByConditions(GetRentHousesByConditionsRequest) returns (GetRentHousesResponse);
+}

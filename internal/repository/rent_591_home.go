@@ -2,10 +2,13 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/programzheng/rent-house-crawler/ent"
 	"github.com/programzheng/rent-house-crawler/ent/rent591home"
+	"github.com/programzheng/rent-house-crawler/ent/rent591homedetail"
+	"github.com/programzheng/rent-house-crawler/ent/rent591homedetailpublish"
 )
 
 func (rp *Repository) UpsertRent591Home(ctx context.Context, r5hi ent.Rent591Home) (*ent.Rent591Home, error) {
@@ -64,6 +67,32 @@ func (rp *Repository) GetRent591HomePostIDs(ctx context.Context) ([]*ent.Rent591
 	}
 
 	return r5hs, nil
+}
+
+func (rp *Repository) GetRent591HomesFilterCreatedAtByStartTimestampAndEndTimestamp(ctx context.Context, startTimestamp *time.Time, endTimestamp *time.Time) ([]*ent.Rent591Home, error) {
+	return rp.client.Rent591Home.
+		Query().
+		Where(
+			rent591home.And(
+				rent591home.CreatedAtGTE(*startTimestamp),
+				rent591home.CreatedAtLTE(*endTimestamp),
+			),
+		).
+		All(ctx)
+}
+
+func (rp *Repository) GetNewRent591HomesByRegionID(ctx context.Context, regionID int) ([]*ent.Rent591Home, error) {
+	return rp.client.Rent591Home.
+		Query().
+		Where(
+			rent591home.HasRent591homeDetailsWith(
+				rent591homedetail.RegionIDEQ(regionID),
+				rent591homedetail.HasRent591homeDetailPublishsWith(
+					rent591homedetailpublish.KeyEQ("new"),
+				),
+			),
+		).
+		All(ctx)
 }
 
 func (rp *Repository) SetRent591HomeRegionByID(ctx context.Context, id int, regionName string) error {

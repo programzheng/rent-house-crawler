@@ -16,7 +16,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/programzheng/rent-house-crawler/config"
 	"github.com/programzheng/rent-house-crawler/internal/cache"
-	"github.com/programzheng/rent-house-crawler/pkg"
+	"github.com/programzheng/rent-house-crawler/pkg/helper"
 )
 
 type CookiesAndCsrfToken struct {
@@ -237,7 +237,7 @@ func GetDataAndRecordTotalCountByCrawl(url string, startRecordCount int) ([]Datu
 
 func crawl(urlString string, recordCount int) HomeResponse {
 	// Get response body at cache
-	cacheKey := fmt.Sprintf("%s_%v", pkg.ConvertUrlToMd5(urlString), recordCount)
+	cacheKey := fmt.Sprintf("%s_%v", helper.ConvertUrlToMd5(urlString), recordCount)
 	bodyBytes, err := getCrawlResponseBytesAtCache(cacheKey)
 	if len(bodyBytes) == 0 || err != nil {
 		parsedURL, err := url.Parse(urlString)
@@ -407,7 +407,7 @@ func GetHomeDetailDataByPostIDAtCrawl(url string, postID int) (*HomeDetailData, 
 
 func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 	// Get response body at cache
-	cacheKey := fmt.Sprintf("%s_%d", pkg.ConvertUrlToMd5(urlString), postID)
+	cacheKey := fmt.Sprintf("%s_%d", helper.ConvertUrlToMd5(urlString), postID)
 	bodyBytes, err := getCrawlResponseBytesAtCache(cacheKey)
 	if len(bodyBytes) == 0 || err != nil {
 		parsedURL, err := url.Parse(urlString)

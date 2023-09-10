@@ -25,6 +25,9 @@ func getOpenDatabaseClient() *ent.Client {
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
+	if config.Cfg.GetBool("database.debug") {
+		client = client.Debug()
+	}
 
 	return client
 }
