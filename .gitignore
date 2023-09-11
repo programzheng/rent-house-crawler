@@ -1,4 +1,6 @@
 /.vscode
 
+.env
 /tmp
 development.yaml
+development.docker.yaml

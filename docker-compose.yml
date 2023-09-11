@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  rent-house-crawler:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - WORKSPACE=app
+    restart: always
+    volumes:
+      - ./development.docker.yaml:/app/development.yaml
+    ports:
+      - ${GRPC_PORT}:${GRPC_PORT}
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true

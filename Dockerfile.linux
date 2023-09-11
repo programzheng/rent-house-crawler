@@ -1,0 +1,14 @@
+FROM golang:alpine AS builder
+WORKDIR /app
+COPY . /app
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-w -s" -o main ./main.go
+
+FROM alpine:latest AS runner
+WORKDIR /app
+COPY --from=builder /app/main .
+# timezone and chromium
+RUN apk add --no-cache tzdata chromium
+ENV TZ $TZ
+EXPOSE 80
+VOLUME ["/app/log"]
+ENTRYPOINT ["./main"]
