@@ -260,7 +260,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 			queryParams.Set("firstRow", strconv.Itoa(recordCount))
 		}
 
-		cookiesAndCsrfToken, err := getCookiesAndCsrfToken(config.Cfg.GetString("crawlers.591.cookie-and-csrf-token-url"))
+		_, err = getCookiesAndCsrfToken(config.Cfg.GetString("crawlers.591.cookie-and-csrf-token-url"))
 		if err != nil {
 			log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdp error: %v", err)
 		}
@@ -370,7 +370,7 @@ func getCookiesAndCsrfTokenByEdpByProxy(url string) (*CookiesAndCsrfToken, error
 		}
 		requestCookies = append(requestCookies, cookie)
 	}
-	cookiesAndCsrfToken := &CookiesAndCsrfToken{
+	cookiesAndCsrfToken = &CookiesAndCsrfToken{
 		Cookies:   requestCookies,
 		CsrfToken: cookiesAndCsrfTokenProxy.CsrfToken,
 	}
