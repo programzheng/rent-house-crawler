@@ -249,7 +249,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 	// Get response body at cache
 	cacheKey := fmt.Sprintf("%s_%v", helper.ConvertUrlToMd5(urlString), recordCount)
 	bodyBytes, err := getCrawlResponseBytesAtCache(cacheKey)
-	if !config.Cfg.GetBool("crawlers.591.cache") && (len(bodyBytes) == 0 || err != nil) {
+	if len(bodyBytes) == 0 || err != nil {
 		parsedURL, err := url.Parse(urlString)
 		if err != nil {
 			log.Fatalf("591_crawler.go Failed url.Parse error: %v", err)
@@ -295,10 +295,13 @@ func crawl(urlString string, recordCount int) HomeResponse {
 		if err != nil {
 			log.Fatalf("591_crawler.go Failed to read response body: %v", err)
 		}
-		// Store the response body in cache for 12 hour
-		_, err = saveCrawlResponseBytesToCache(cacheKey, bodyBytes, 12*time.Hour)
-		if err != nil {
-			log.Fatalf("591_crawler.go Failed to save crawl response bytes to cache: %v", err)
+
+		if config.Cfg.GetBool("crawlers.591.cache") {
+			// Store the response body in cache for 12 hour
+			_, err = saveCrawlResponseBytesToCache(cacheKey, bodyBytes, 12*time.Hour)
+			if err != nil {
+				log.Fatalf("591_crawler.go Failed to save crawl response bytes to cache: %v", err)
+			}
 		}
 	}
 	// Create an instance of the Response struct
@@ -307,7 +310,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 	// Unmarshal the JSON data into the struct
 	err = json.Unmarshal(bodyBytes, &responseData)
 	if err != nil {
-		log.Fatalf("591_crawler.go crawl Failed to unmarshal JSON: %v", err)
+		log.Fatalf("591_crawler.go crawl Failed to unmarshal JSON: %s error: %v", string(bodyBytes), err)
 	}
 
 	return responseData
