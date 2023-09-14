@@ -24,6 +24,16 @@ type CookiesAndCsrfToken struct {
 	CsrfToken string
 }
 
+type CookiesAndCsrfTokenProxy struct {
+	ProxyCookies []*ProxyCookie `json:"cookies"`
+	CsrfToken    string         `json:"csrf_token"`
+}
+
+type ProxyCookie struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type HomeResponse struct {
 	Status  int    `json:"status"`
 	Data    Data   `json:"data"`
@@ -32,7 +42,7 @@ type HomeResponse struct {
 }
 
 type Data struct {
-	TopData  []TopData `json:"topData"`
+	// TopData  []TopData `json:"topData"`
 	Biddings []Bidding `json:"biddings"`
 	Data     []Datum   `json:"data"`
 	Page     string    `json:"page"`
@@ -239,7 +249,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 	// Get response body at cache
 	cacheKey := fmt.Sprintf("%s_%v", helper.ConvertUrlToMd5(urlString), recordCount)
 	bodyBytes, err := getCrawlResponseBytesAtCache(cacheKey)
-	if len(bodyBytes) == 0 || err != nil {
+	if !config.Cfg.GetBool("crawlers.591.cache") && (len(bodyBytes) == 0 || err != nil) {
 		parsedURL, err := url.Parse(urlString)
 		if err != nil {
 			log.Fatalf("Failed url.Parse error: %v", err)
@@ -249,7 +259,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 			queryParams.Set("firstRow", strconv.Itoa(recordCount))
 		}
 
-		cookiesAndCsrfToken, err := getCookiesAndCsrfTokenByEdp(config.Cfg.GetString("crawlers.591.cookie-and-csrf-token-url"))
+		cookiesAndCsrfToken, err := getCookiesAndCsrfToken(config.Cfg.GetString("crawlers.591.cookie-and-csrf-token-url"))
 		if err != nil {
 			log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdp error: %v", err)
 		}
@@ -303,12 +313,64 @@ func crawl(urlString string, recordCount int) HomeResponse {
 	return responseData
 }
 
-func getCookiesAndCsrfTokenByEdp(url string) (*CookiesAndCsrfToken, error) {
+func getCookiesAndCsrfToken(url string) (*CookiesAndCsrfToken, error) {
 	// singleton
 	if cookiesAndCsrfToken != nil {
 		return cookiesAndCsrfToken, nil
 	}
 
+	if config.Cfg.GetBool("crawlers.591.proxy") {
+		return getCookiesAndCsrfTokenByEdpByProxy(url)
+	}
+
+	return getCookiesAndCsrfTokenByEdp(url)
+}
+
+func getCookiesAndCsrfTokenByEdpByProxy(url string) (*CookiesAndCsrfToken, error) {
+	// Create HTTP client
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdpByProxy Failed to create GET request: %v", err)
+	}
+	// Send GET request
+	response, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdpByProxy Failed to send GET request: %v", err)
+	}
+	defer response.Body.Close()
+
+	// Read the response body
+	bodyBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Fatalf("Failed to read response body: %v", err)
+	}
+
+	var cookiesAndCsrfTokenProxy *CookiesAndCsrfTokenProxy
+	err = json.Unmarshal(bodyBytes, &cookiesAndCsrfTokenProxy)
+	if err != nil {
+		log.Printf("591_crawler.go getCookiesAndCsrfTokenByEdpByProxy &cookiesAndCsrfTokenProxy Failed to unmarshal JSON: %v", err)
+	}
+
+	var requestCookies []*http.Cookie
+	for _, cookieProxy := range cookiesAndCsrfTokenProxy.ProxyCookies {
+		cookie := &http.Cookie{
+			Name:  cookieProxy.Name,
+			Value: cookieProxy.Value,
+		}
+		requestCookies = append(requestCookies, cookie)
+	}
+	cookiesAndCsrfToken := &CookiesAndCsrfToken{
+		Cookies:   requestCookies,
+		CsrfToken: cookiesAndCsrfTokenProxy.CsrfToken,
+	}
+
+	return cookiesAndCsrfToken, nil
+}
+
+func getCookiesAndCsrfTokenByEdp(url string) (*CookiesAndCsrfToken, error) {
 	// Create Chromedp context
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
