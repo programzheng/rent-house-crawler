@@ -252,7 +252,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 	if !config.Cfg.GetBool("crawlers.591.cache") && (len(bodyBytes) == 0 || err != nil) {
 		parsedURL, err := url.Parse(urlString)
 		if err != nil {
-			log.Fatalf("Failed url.Parse error: %v", err)
+			log.Fatalf("591_crawler.go Failed url.Parse error: %v", err)
 		}
 		queryParams := parsedURL.Query()
 		if recordCount > 0 {
@@ -272,7 +272,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 		// Create GET request
 		req, err := http.NewRequest("GET", urlString, nil)
 		if err != nil {
-			log.Fatalf("Failed to create GET request: %v", err)
+			log.Fatalf("591_crawler.go Failed to create GET request: %v", err)
 		}
 		req.URL.RawQuery = queryParams.Encode()
 
@@ -286,19 +286,19 @@ func crawl(urlString string, recordCount int) HomeResponse {
 		// Send GET request
 		response, err := client.Do(req)
 		if err != nil {
-			log.Fatalf("Failed to send GET request: %v", err)
+			log.Fatalf("591_crawler.go Failed to send GET request: %v", err)
 		}
 		defer response.Body.Close()
 
 		// Read the response body
 		bodyBytes, err = io.ReadAll(response.Body)
 		if err != nil {
-			log.Fatalf("Failed to read response body: %v", err)
+			log.Fatalf("591_crawler.go Failed to read response body: %v", err)
 		}
 		// Store the response body in cache for 12 hour
 		_, err = saveCrawlResponseBytesToCache(cacheKey, bodyBytes, 12*time.Hour)
 		if err != nil {
-			log.Fatalf("Failed to save crawl response bytes to cache: %v", err)
+			log.Fatalf("591_crawler.go Failed to save crawl response bytes to cache: %v", err)
 		}
 	}
 	// Create an instance of the Response struct
@@ -307,7 +307,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 	// Unmarshal the JSON data into the struct
 	err = json.Unmarshal(bodyBytes, &responseData)
 	if err != nil {
-		log.Fatalf("Failed to unmarshal JSON: %v", err)
+		log.Fatalf("591_crawler.go crawl Failed to unmarshal JSON: %v", err)
 	}
 
 	return responseData
@@ -474,7 +474,7 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 	if len(bodyBytes) == 0 || err != nil {
 		parsedURL, err := url.Parse(urlString)
 		if err != nil {
-			log.Fatalf("Failed url.Parse error: %v", err)
+			log.Fatalf("591_crawler.go Failed url.Parse error: %v", err)
 		}
 		queryParams := parsedURL.Query()
 		queryParams.Set("id", strconv.Itoa(postID))
@@ -492,7 +492,7 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 		// Create GET request
 		req, err := http.NewRequest("GET", urlString, nil)
 		if err != nil {
-			log.Fatalf("Failed to create GET request: %v", err)
+			log.Fatalf("591_crawler.go Failed to create GET request: %v", err)
 		}
 		req.URL.RawQuery = queryParams.Encode()
 
@@ -515,20 +515,20 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 		// Send GET request
 		response, err := client.Do(req)
 		if err != nil {
-			log.Fatalf("Failed to send GET request: %v", err)
+			log.Fatalf("591_crawler.go Failed to send GET request: %v", err)
 		}
 		defer response.Body.Close()
 
 		// Read the response body
 		bodyBytes, err = io.ReadAll(response.Body)
 		if err != nil {
-			log.Fatalf("Failed to read response body: %v", err)
+			log.Fatalf("591_crawler.go Failed to read response body: %v", err)
 		}
 
 		// Store the response body in cache for 12 hour
 		_, err = saveCrawlResponseBytesToCache(cacheKey, bodyBytes, 12*time.Hour)
 		if err != nil {
-			log.Fatalf("Failed to save crawl response bytes to cache: %v", err)
+			log.Fatalf("591_crawler.go Failed to save crawl response bytes to cache: %v", err)
 		}
 	}
 	// Create an instance of the Response struct
@@ -537,7 +537,7 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 	// Unmarshal the JSON data into the HomeDetailResponse struct
 	err = json.Unmarshal(bodyBytes, &response)
 	if err != nil {
-		log.Printf("&response Failed to unmarshal JSON: %v", err)
+		log.Printf("591_crawler.go &response Failed to unmarshal JSON: %v", err)
 	}
 	switch response.Data.(type) {
 	case map[string]interface{}:
@@ -545,7 +545,7 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 		var responseData HomeDetailData
 		err = json.Unmarshal(dataByte, &responseData)
 		if err != nil {
-			log.Printf("&responseData Failed to unmarshal JSON: %v", err)
+			log.Printf("591_crawler.go &responseData Failed to unmarshal JSON: %v", err)
 		}
 		return &responseData
 	default:
