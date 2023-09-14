@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	browser "github.com/EDDYCJY/fake-useragent"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 	"github.com/programzheng/rent-house-crawler/config"
@@ -276,6 +277,8 @@ func crawl(urlString string, recordCount int) HomeResponse {
 		}
 		req.URL.RawQuery = queryParams.Encode()
 
+		// Set user agent to header
+		req.Header.Set("User-Agent", browser.Random())
 		// Set the CSRF token
 		req.Header.Set("X-CSRF-TOKEN", cookiesAndCsrfToken.CsrfToken)
 		// Set the obtained cookies in the request
@@ -338,6 +341,8 @@ func getCookiesAndCsrfTokenByEdpByProxy(url string) (*CookiesAndCsrfToken, error
 	if err != nil {
 		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdpByProxy Failed to create GET request: %v", err)
 	}
+	// Set user agent to header
+	req.Header.Set("User-Agent", browser.Random())
 	// Send GET request
 	response, err := client.Do(req)
 	if err != nil {
