@@ -492,9 +492,9 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 		queryParams := parsedURL.Query()
 		queryParams.Set("id", strconv.Itoa(postID))
 
-		cookiesAndCsrfToken, err := getCookiesAndCsrfTokenByEdp(config.Cfg.GetString("crawlers.591.cookie-and-csrf-token-url"))
+		_, err = getCookiesAndCsrfToken(config.Cfg.GetString("crawlers.591.cookie-and-csrf-token-url"))
 		if err != nil {
-			log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdp error: %v", err)
+			log.Fatalf("591_crawler.go getCookiesAndCsrfToken error: %v", err)
 		}
 
 		// Create HTTP client
@@ -509,6 +509,8 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 		}
 		req.URL.RawQuery = queryParams.Encode()
 
+		// Set user agent to header
+		req.Header.Set("User-Agent", browser.Random())
 		// Set the CSRF token
 		req.Header.Set("X-CSRF-TOKEN", cookiesAndCsrfToken.CsrfToken)
 		// Set the obtained cookies in the request
@@ -522,7 +524,9 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 		req.Header.Set("device", "pc")
 
 		delaySeconds := 1
-		fmt.Printf("post id:%d, waiting %d seconds...\n", postID, delaySeconds)
+		if config.Cfg.GetBool("crawlers.591.debug") {
+			log.Printf("crawlHomeDetailByPostID post id:%d, waiting %d seconds...\n", postID, delaySeconds)
+		}
 		time.Sleep(time.Duration(delaySeconds) * time.Second)
 
 		// Send GET request
