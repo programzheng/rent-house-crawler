@@ -12,7 +12,8 @@ cache:
   db: 0
 crawlers:
   "591":
-    cache: false
+    debug: true
+    cache: true
     proxy: true
     cookie-and-csrf-token-url: ""
     urls:

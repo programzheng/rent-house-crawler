@@ -262,7 +262,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 
 		_, err = getCookiesAndCsrfToken(config.Cfg.GetString("crawlers.591.cookie-and-csrf-token-url"))
 		if err != nil {
-			log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdp error: %v", err)
+			log.Fatalf("591_crawler.go getCookiesAndCsrfToken error: %v", err)
 		}
 
 		// Create HTTP client
@@ -285,6 +285,8 @@ func crawl(urlString string, recordCount int) HomeResponse {
 		for _, cookie := range cookiesAndCsrfToken.Cookies {
 			req.AddCookie(cookie)
 		}
+
+		time.Sleep(time.Second * 1)
 
 		// Send GET request
 		response, err := client.Do(req)
@@ -447,6 +449,9 @@ func parseCSRFToken(html string) string {
 }
 
 func getCrawlResponseBytesAtCache(key string) ([]byte, error) {
+	if config.Cfg.GetBool("crawlers.591.debug") {
+		log.Printf("getCrawlResponseBytesAtCache key:%s\n", key)
+	}
 	cd, err := cache.GetCacheDriver("")
 	if err != nil {
 		return []byte{}, err
