@@ -343,7 +343,7 @@ func getCookiesAndCsrfToken(url string) (*CookiesAndCsrfToken, error) {
 func getCookiesAndCsrfTokenByProxy(url string) (*CookiesAndCsrfToken, error) {
 	// Create HTTP client
 	client := &http.Client{
-		Timeout: time.Second * 10,
+		Timeout: time.Minute * 1,
 	}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
