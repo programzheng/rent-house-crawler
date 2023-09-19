@@ -334,27 +334,27 @@ func getCookiesAndCsrfToken(url string) (*CookiesAndCsrfToken, error) {
 	}
 
 	if config.Cfg.GetBool("crawlers.591.proxy") {
-		return getCookiesAndCsrfTokenByEdpByProxy(url)
+		return getCookiesAndCsrfTokenByProxy(url)
 	}
 
 	return getCookiesAndCsrfTokenByEdp(url)
 }
 
-func getCookiesAndCsrfTokenByEdpByProxy(url string) (*CookiesAndCsrfToken, error) {
+func getCookiesAndCsrfTokenByProxy(url string) (*CookiesAndCsrfToken, error) {
 	// Create HTTP client
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdpByProxy Failed to create GET request: %v", err)
+		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByProxy Failed to create GET request: %v", err)
 	}
 	// Set user agent to header
 	req.Header.Set("User-Agent", browser.Random())
 	// Send GET request
 	response, err := client.Do(req)
 	if err != nil {
-		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByEdpByProxy Failed to send GET request: %v", err)
+		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByProxy Failed to send GET request: %v", err)
 	}
 	defer response.Body.Close()
 
@@ -367,7 +367,7 @@ func getCookiesAndCsrfTokenByEdpByProxy(url string) (*CookiesAndCsrfToken, error
 	var cookiesAndCsrfTokenProxy *CookiesAndCsrfTokenProxy
 	err = json.Unmarshal(bodyBytes, &cookiesAndCsrfTokenProxy)
 	if err != nil {
-		log.Printf("591_crawler.go getCookiesAndCsrfTokenByEdpByProxy &cookiesAndCsrfTokenProxy Failed to unmarshal JSON: %v", err)
+		log.Printf("591_crawler.go getCookiesAndCsrfTokenByProxy &cookiesAndCsrfTokenProxy Failed to unmarshal JSON: %v", err)
 	}
 
 	var requestCookies []*http.Cookie
