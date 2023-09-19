@@ -12,8 +12,9 @@ FROM build_base AS server_builder
 # Here we copy the rest of the source code
 COPY . .
 
-RUN go build -o main ./main.go
 RUN apk add --no-cache chromium
+
+RUN go build -o main ./main.go
 
 EXPOSE 80
 
