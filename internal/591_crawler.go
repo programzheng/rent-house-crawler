@@ -278,7 +278,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 		req.URL.RawQuery = queryParams.Encode()
 
 		// Set user agent to header
-		req.Header.Set("User-Agent", browser.Random())
+		req.Header.Set("User-Agent", browser.Chrome())
 		// Set the CSRF token
 		req.Header.Set("X-CSRF-TOKEN", cookiesAndCsrfToken.CsrfToken)
 		// Set the obtained cookies in the request
@@ -350,7 +350,7 @@ func getCookiesAndCsrfTokenByProxy(url string) (*CookiesAndCsrfToken, error) {
 		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByProxy Failed to create GET request: %v", err)
 	}
 	// Set user agent to header
-	req.Header.Set("User-Agent", browser.Random())
+	req.Header.Set("User-Agent", browser.Chrome())
 	// Send GET request
 	response, err := client.Do(req)
 	if err != nil {
@@ -516,7 +516,7 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 		req.URL.RawQuery = queryParams.Encode()
 
 		// Set user agent to header
-		req.Header.Set("User-Agent", browser.Random())
+		req.Header.Set("User-Agent", browser.Chrome())
 		// Set the CSRF token
 		req.Header.Set("X-CSRF-TOKEN", cookiesAndCsrfToken.CsrfToken)
 		// Set the obtained cookies in the request
