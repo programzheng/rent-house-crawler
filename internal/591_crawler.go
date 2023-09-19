@@ -322,6 +322,12 @@ func crawl(urlString string, recordCount int) HomeResponse {
 }
 
 func getCookiesAndCsrfToken(url string) (*CookiesAndCsrfToken, error) {
+	if config.Cfg.GetBool("crawlers.591.debug") {
+		defer func() {
+			log.Printf("getCookiesAndCsrfToken cookiesAndCsrfToken:%v\n", cookiesAndCsrfToken)
+		}()
+	}
+
 	// singleton
 	if cookiesAndCsrfToken != nil {
 		return cookiesAndCsrfToken, nil
