@@ -232,6 +232,9 @@ type HomeDetailDataPositionRoundDataChildrenChildren struct {
 }
 
 // singleton cookiesAndCsrfToken
+var userAgent *string
+
+// singleton cookiesAndCsrfToken
 var cookiesAndCsrfToken *CookiesAndCsrfToken
 
 const RECORD_OFFSET = 30
@@ -244,6 +247,17 @@ func GetDataAndRecordTotalCountByCrawl(url string, startRecordCount int) ([]Datu
 		log.Fatalf("591_crawler.go GetDataAndRecordTotalCountByCrawl error: %v", err)
 	}
 	return response.Data.Data, recordTotalCount, nil
+}
+
+func getUserAgent() *string {
+	if userAgent != nil {
+		return userAgent
+	}
+
+	random := browser.Random()
+	userAgent = &random
+
+	return userAgent
 }
 
 func crawl(urlString string, recordCount int) HomeResponse {
@@ -278,7 +292,7 @@ func crawl(urlString string, recordCount int) HomeResponse {
 		req.URL.RawQuery = queryParams.Encode()
 
 		// Set user agent to header
-		req.Header.Set("User-Agent", browser.Chrome())
+		req.Header.Set("User-Agent", *getUserAgent())
 		// Set the CSRF token
 		req.Header.Set("X-CSRF-TOKEN", cookiesAndCsrfToken.CsrfToken)
 		// Set the obtained cookies in the request
@@ -349,7 +363,7 @@ func getCookiesAndCsrfTokenByProxy(url string) (*CookiesAndCsrfToken, error) {
 		log.Fatalf("591_crawler.go getCookiesAndCsrfTokenByProxy Failed to create GET request: %v", err)
 	}
 	// Set user agent to header
-	req.Header.Set("User-Agent", browser.Chrome())
+	req.Header.Set("User-Agent", *getUserAgent())
 	// Send GET request
 	response, err := client.Do(req)
 	if err != nil {
@@ -515,7 +529,7 @@ func crawlHomeDetailByPostID(urlString string, postID int) *HomeDetailData {
 		req.URL.RawQuery = queryParams.Encode()
 
 		// Set user agent to header
-		req.Header.Set("User-Agent", browser.Chrome())
+		req.Header.Set("User-Agent", *getUserAgent())
 		// Set the CSRF token
 		req.Header.Set("X-CSRF-TOKEN", cookiesAndCsrfToken.CsrfToken)
 		// Set the obtained cookies in the request
