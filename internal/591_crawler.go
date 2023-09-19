@@ -254,8 +254,11 @@ func getUserAgent() *string {
 		return userAgent
 	}
 
-	random := browser.Chrome()
-	userAgent = &random
+	ua := config.Cfg.GetString("crawlers.591.user-agent")
+	if ua == "" {
+		ua = browser.Chrome()
+	}
+	userAgent = &ua
 
 	return userAgent
 }
