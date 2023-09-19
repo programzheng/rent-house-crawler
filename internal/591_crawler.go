@@ -254,7 +254,7 @@ func getUserAgent() *string {
 		return userAgent
 	}
 
-	random := browser.Random()
+	random := browser.Chrome()
 	userAgent = &random
 
 	return userAgent
